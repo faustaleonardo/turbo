@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         settings:
-          - host: ubuntu-latest
+          - host: quay.io/pypa/manylinux2014_x86_64
             target: "aarch64-unknown-linux-gnu"
             lib-cache-key: turbo-lib-cross-${{ inputs.release_branch }}
             rustflags: 'RUSTFLAGS="-C linker=aarch64-linux-gnu-gcc"'
