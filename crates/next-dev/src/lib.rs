@@ -32,6 +32,7 @@ use turbo_tasks_fs::{DiskFileSystemVc, FileSystemVc};
 use turbo_tasks_memory::MemoryBackend;
 use turbopack_cli_utils::issue::{ConsoleUi, ConsoleUiVc, LogOptions};
 use turbopack_core::{
+    environment::ServerAddr,
     issue::IssueSeverity,
     resolve::{parse::RequestVc, pattern::QueryMapVc},
 };
@@ -213,6 +214,7 @@ impl NextDevServerBuilder {
         let entry_requests = Arc::new(self.entry_requests);
         let console_ui = Arc::new(ConsoleUi::new(log_options));
         let console_ui_to_dev_server = console_ui.clone();
+        let server_addr = Arc::new(server.addr);
         let tasks = turbo_tasks.clone();
         let source = move || {
             source(
@@ -224,6 +226,7 @@ impl NextDevServerBuilder {
                 console_ui.clone().into(),
                 browserslist_query.clone(),
                 server_component_externals.clone(),
+                server_addr.clone().into(),
             )
         };
 
@@ -270,6 +273,7 @@ async fn source(
     console_ui: TransientInstance<ConsoleUi>,
     browserslist_query: String,
     server_component_externals: Vec<String>,
+    server_addr: TransientInstance<SocketAddr>,
 ) -> Result<ContentSourceVc> {
     let console_ui = (*console_ui).clone().cell();
     let output_fs = output_fs(&project_dir, console_ui);
@@ -283,6 +287,7 @@ async fn source(
     let env = load_env(project_path);
 
     let output_root = output_fs.root().join("/.next/server");
+    let server_addr = ServerAddr::new(*server_addr).cell();
 
     let dev_server_fs = DevServerFileSystemVc::new().as_file_system();
     let dev_server_root = dev_server_fs.root();
@@ -310,6 +315,7 @@ async fn source(
         dev_server_root,
         env,
         &browserslist_query,
+        server_addr,
     );
     let app_source = create_app_source(
         project_path,
@@ -318,6 +324,7 @@ async fn source(
         env,
         &browserslist_query,
         StringsVc::cell(server_component_externals),
+        server_addr,
     );
     let viz = turbo_tasks_viz::TurboTasksSource {
         turbo_tasks: turbo_tasks.into(),
@@ -441,11 +448,7 @@ pub async fn start_server(options: &DevServerOptions) -> Result<()> {
     let server = server.build().await?;
 
     {
-        let index_uri = if server.addr.ip().is_loopback() || server.addr.ip().is_unspecified() {
-            format!("http://localhost:{}", server.addr.port())
-        } else {
-            format!("http://{}", server.addr)
-        };
+        let index_uri = ServerAddr::new(server.addr).to_string()?;
         println!(
             "{} - started server on {}:{}, url: {}",
             "ready".green(),
