@@ -19,7 +19,6 @@ jobs:
           - host: ubuntu-latest
             target: "aarch64-unknown-linux-gnu"
             lib-cache-key: turbo-lib-cross-${{ inputs.release_branch }}
-            docker: quay.io/pypa/manylinux2014_x86_64
             rustflags: 'RUSTFLAGS="-C linker=aarch64-linux-gnu-gcc"'
             setup: "sudo apt-get update && sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu"
     runs-on: ${{ matrix.settings.host }}
