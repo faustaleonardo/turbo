@@ -20,7 +20,7 @@ jobs:
             target: "aarch64-unknown-linux-gnu"
             lib-cache-key: turbo-lib-cross-${{ inputs.release_branch }}
             rustflags: 'RUSTFLAGS="-C linker=aarch64-linux-gnu-gcc"'
-            setup: "yum update && yum install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu"
+            setup: "yum -y update && yum install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu"
     runs-on: ${{ matrix.settings.host }}
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
