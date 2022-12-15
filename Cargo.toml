@@ -26,6 +26,7 @@ members = [
   "crates/turbopack-dev-server",
   "crates/turbopack-ecmascript",
   "crates/turbopack-env",
+  "crates/turbopack-mdx",
   "crates/turbopack-node",
   "crates/turbopack-json",
   "crates/turbopack-static",
@@ -96,3 +97,8 @@ modularize_imports = { version = "0.25.10" }
 mdxjs = { version = "0.1.4" }
 next-dev = { path = "crates/next-dev", version = "0.1.0" }
 node-file-trace = { path = "crates/node-file-trace", version = "0.1.0" }
+# Be careful when selecting tls backend, including change default tls backend.
+# If you changed, must verify with ALL build targets with next-swc to ensure
+# it works. next-swc have various platforms, some doesn't support native (using openssl-sys)
+# and some aren't buildable with rustls.
+reqwest = { version = "0.11.13", default-features = false }
